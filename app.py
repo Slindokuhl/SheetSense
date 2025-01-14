@@ -8,7 +8,7 @@ def home():
 
 @app.route('/view_reports')
 def view_reports():
-    return render_template('reports.html')
+    return render_template('Reports.html')
 
 @app.route('/view_history')
 def view_history():
