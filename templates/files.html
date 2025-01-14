@@ -1,191 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Files Upload</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.7.0/firebase-app.js';
-    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.7.0/firebase-storage.js';
-    import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.7.0/firebase-firestore.js';
-    import * as XLSX from 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js';
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCUZJABu5wtqWjoLtYK-TC2GOlnSoz2zMw",
-      authDomain: "python-3dc23.firebaseapp.com",
-      projectId: "python-3dc23",
-      storageBucket: "python-3dc23.firebasestorage.app",
-      messagingSenderId: "207722382630",
-      appId: "1:207722382630:web:80b5d78bd3aa823f8fade7",
-      measurementId: "G-GSB36RK1PP"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const storage = getStorage(app);
-    const db = getFirestore(app);
-
-    window.uploadFiles = function() {
-      const studentFile = document.getElementById('student_file').files[0];
-      const reportFile = document.getElementById('report_file').files[0];
-
-      if (studentFile) {
-        uploadFile(studentFile, 'student_files', 'Students');
-      }
-
-      if (reportFile) {
-        uploadFile(reportFile, 'report_files', 'Reports');
-      }
-    };
-
-    function uploadFile(file, storagePath, collectionName) {
-      const storageRef = ref(storage, `${storagePath}/${file.name}`);
-      uploadBytes(storageRef, file).then((snapshot) => {
-        console.log(`Uploaded ${file.name} successfully.`);
-        getDownloadURL(snapshot.ref).then(function(downloadURL) {
-          console.log(`${file.name} available at: `, downloadURL);
-          processExcelFile(file, collectionName);
-        });
-      }).catch((error) => {
-        console.error(`Error uploading ${file.name}: `, error);
-      });
-    }
-
-    function processExcelFile(file, collectionName) {
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const data = event.target.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(sheet);
-
-        console.log(jsonData);
-        saveToFirestore(jsonData, collectionName);
-      };
-      reader.readAsBinaryString(file);
-    }
-
-    function saveToFirestore(data, collectionName) {
-      data.forEach(item => {
-        addDoc(collection(db, collectionName), item)
-          .then(() => {
-            console.log(`Data added to ${collectionName} collection.`);
-          })
-          .catch(error => {
-            console.error("Error adding document: ", error);
-          });
-      });
-    }
-  </script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      margin: 0;
-      padding: 0;
-    }
-
-    .navbar {
-      background-color: #333;
-      padding: 15px;
-      color: white;
-      text-align: center;
-    }
-
-    .content {
-      padding: 30px;
-      background-color: white;
-      margin: 20px auto;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      max-width: 500px;
-    }
-
-    h1, h2 {
-      color: #333;
-      font-size: 28px;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .upload-form {
-      padding: 20px;
-      border-radius: 8px;
-      background-color: #f9f9f9;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .upload-form label {
-      display: block;
-      margin-bottom: 8px;
-      color: #555;
-    }
-
-    .upload-form input[type="file"] {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      border: 1px solid #ddd;
-    }
-
-    .upload-form button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-      width: 100%;
-      transition: background-color 0.3s ease;
-    }
-
-    .upload-form button:hover {
-      background-color: #45a049;
-    }
-
-    a {
-      display: inline-block;
-      margin-top: 20px;
-      text-align: center;
-      color: white;
-      background-color: #333;
-      padding: 10px 20px;
-      border-radius: 5px;
-      text-decoration: none;
-      transition: background-color 0.3s ease;
-    }
-
-    a:hover {
-      background-color: #4CAF50;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Files</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="style/files.css">
 </head>
 <body>
   <div class="navbar">
     <h1>Manage Files</h1>
   </div>
 
-  <div class="content">
-    <h2>Upload Files</h2>
-    <div class="upload-form">
-      <form>
-        <label for="student_file">Choose Student File:</label>
-        <input type="file" id="student_file">
+    <div class="content">
+        <h2>Upload Files</h2>
+        
+        <!-- Student Files Upload -->
+        <div class="upload-form">
+            <h3>Upload Student Files</h3>
+            <form action="/upload_student_file" method="POST" enctype="multipart/form-data">
+                <label for="student_file">Choose Students files:</label>
+                <input type="file" name="student_file" id="student_file" required>
+                <button type="submit">Upload Student File</button>
+            </form>
+        </div>
+        
+        <!-- Report Files Upload -->
+        <div class="upload-form">
+            <h3>Upload Report Files</h3>
+            <form action="/upload_report_file" method="POST" enctype="multipart/form-data">
+                <label for="report_file">Choose Reports Files:</label>
+                <input type="file" name="report_file" id="report_file" required>
+                <button type="submit">Upload Report File</button>
+            </form>
+        </div>
 
-        <label for="report_file">Choose Report File:</label>
-        <input type="file" id="report_file">
-
-        <button type="button" onclick="uploadFiles()">Upload Files</button>
-      </form>
+        <a href="/">Back to Dashboard</a>
     </div>
-    <a href="/">Back to Dashboard</a>
-  </div>
+    <script src="../templates/js/files.js" ></script>
 </body>
 </html>
